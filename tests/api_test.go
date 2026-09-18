@@ -18,6 +18,10 @@ import (
 func TestMain(m *testing.M) {
 	gin.SetMode(gin.TestMode)
 	os.Setenv("OLLAMA_MOCK_STREAM_DELAY_MS", "0")
+	// Keep the default suite independent of any key configured in the environment.
+	os.Unsetenv("OLLAMA_MOCK_API_KEY")
+	os.Unsetenv("OLLAMA_MOCK_API_KEYS")
+	os.Unsetenv("OLLAMA_MOCK_AUTH_EXEMPT")
 	os.Exit(m.Run())
 }
 

@@ -4,6 +4,11 @@ package httputil
 
 import "github.com/gin-gonic/gin"
 
+// Unauthorized responds with 401.
+func Unauthorized(c *gin.Context, msg string) {
+	c.JSON(401, gin.H{"error": msg})
+}
+
 // BadRequest responds with 400.
 func BadRequest(c *gin.Context, msg string) {
 	c.JSON(400, gin.H{"error": msg})

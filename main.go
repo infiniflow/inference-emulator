@@ -18,6 +18,11 @@ func main() {
 
 	addr := ":" + config.Port()
 	log.Printf("Ollama mock listening on %s", addr)
+	if config.AuthEnabled() {
+		log.Printf("API key authentication enabled with %d key(s)", len(config.APIKeys()))
+	} else {
+		log.Print("API key authentication disabled (no OLLAMA_MOCK_API_KEY configured)")
+	}
 	if err := r.Run(addr); err != nil {
 		log.Fatal(err)
 	}

@@ -3,6 +3,7 @@ package router
 
 import (
 	"github.com/gin-gonic/gin"
+	"ollama-mock/internal/auth"
 	"ollama-mock/internal/handlers"
 	"ollama-mock/internal/httputil"
 )
@@ -13,7 +14,9 @@ func Register(r *gin.Engine) {
 	// instead of gin's default 404.
 	r.HandleMethodNotAllowed = true
 
-	api := r.Group("/api")
+	// Every /api route goes through the API key middleware; it is a no-op unless
+	// at least one key is configured.
+	api := r.Group("/api", auth.Middleware())
 	{
 		api.GET("/tags", handlers.Tags)
 		api.GET("/version", handlers.Version)

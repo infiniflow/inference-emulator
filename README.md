@@ -7,7 +7,8 @@ An **Ollama native API emulator** written in Go + Gin. Every response is a fixed
 - Emulates the core Ollama endpoints (`tags` / `version` / `ps` / `generate` / `chat` / `embed` / `embeddings` / `show` / `pull` / `push` / `create` / `copy` / `delete`)
 - Streaming endpoints follow NDJSON (`application/x-ndjson`) strictly, writing and flushing line by line
 - JSON field names are identical to the native Ollama API
-- Errors always use the `{"error": "..."}` shape (400 / 404 / 405 included)
+- Optional API key authentication (disabled unless a key is configured)
+- Errors always use the `{"error": "..."}` shape (400 / 401 / 404 / 405 included)
 - Only Gin plus the standard library
 
 ## Run
@@ -24,6 +25,41 @@ Environment variables:
 | --- | --- | --- |
 | `OLLAMA_MOCK_PORT` | Listening port | `11434` |
 | `OLLAMA_MOCK_STREAM_DELAY_MS` | Delay between two streamed chunks (milliseconds, `0` disables the wait) | `10` |
+| `OLLAMA_MOCK_API_KEY` | Single API key; enabling it turns authentication on | (unset) |
+| `OLLAMA_MOCK_API_KEYS` | Comma-separated list of API keys (merged with the above) | (unset) |
+| `OLLAMA_MOCK_AUTH_EXEMPT` | Comma-separated route paths that stay open even when auth is on, e.g. `/api/version` | (none) |
+
+## API key authentication
+
+Authentication is **off by default** (the native Ollama server has none). As soon as
+`OLLAMA_MOCK_API_KEY` or `OLLAMA_MOCK_API_KEYS` is set, every `/api/*` route requires a key.
+
+```bash
+OLLAMA_MOCK_API_KEY=sk-mock-123 go run .
+```
+
+Accepted header forms (checked in this order):
+
+1. `X-API-Key: sk-mock-123`
+2. `Authorization: Bearer sk-mock-123`
+3. `Authorization: sk-mock-123` (bare key)
+
+```bash
+curl -s http://localhost:11434/api/tags -H 'Authorization: Bearer sk-mock-123' | jq
+curl -s http://localhost:11434/api/tags -H 'X-API-Key: sk-mock-123' | jq
+```
+
+A missing or wrong key returns `401` with the unified error payload:
+
+```json
+{"error":"unauthorized"}
+```
+
+To keep a health-check endpoint open:
+
+```bash
+OLLAMA_MOCK_API_KEY=sk-mock-123 OLLAMA_MOCK_AUTH_EXEMPT=/api/version go run .
+```
 
 ## Fixed mock data
 
@@ -87,6 +123,7 @@ internal/models      # request/response structs + fixed mock data
 internal/handlers    # endpoint handlers
 internal/router      # route registration
 internal/stream      # NDJSON streaming helpers
+internal/auth        # optional API key middleware
 internal/httputil    # unified error responses
 tests/api_test.go    # API tests
 ```
