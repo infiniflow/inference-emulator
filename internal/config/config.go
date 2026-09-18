@@ -60,6 +60,16 @@ func AuthEnabled() bool {
 	return len(APIKeys()) > 0
 }
 
+// AccessLogEnabled reports whether every request should be logged. Set
+// OLLAMA_MOCK_ACCESS_LOG to off / 0 / false / no to silence the access log.
+func AccessLogEnabled() bool {
+	switch strings.ToLower(strings.TrimSpace(os.Getenv("OLLAMA_MOCK_ACCESS_LOG"))) {
+	case "0", "off", "false", "no", "disabled":
+		return false
+	}
+	return true
+}
+
 // AuthExemptPaths returns the route paths that stay open even when
 // authentication is enabled, configured via OLLAMA_MOCK_AUTH_EXEMPT
 // (comma-separated, e.g. "/api/version"). Empty by default: every /api route

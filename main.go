@@ -6,13 +6,15 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"ollama-mock/internal/config"
+	"ollama-mock/internal/logging"
 	"ollama-mock/internal/router"
 )
 
 func main() {
 	gin.SetMode(gin.ReleaseMode)
 	r := gin.New()
-	r.Use(gin.Logger(), gin.Recovery())
+	// One structured line per request; Recovery keeps the server alive on panics.
+	r.Use(logging.Middleware(), gin.Recovery())
 
 	router.Register(r)
 

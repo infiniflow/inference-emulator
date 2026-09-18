@@ -28,6 +28,7 @@ Environment variables:
 | `OLLAMA_MOCK_API_KEY` | Single API key; enabling it turns authentication on | (unset) |
 | `OLLAMA_MOCK_API_KEYS` | Comma-separated list of API keys (merged with the above) | (unset) |
 | `OLLAMA_MOCK_AUTH_EXEMPT` | Comma-separated route paths that stay open even when auth is on, e.g. `/api/version` | (none) |
+| `OLLAMA_MOCK_ACCESS_LOG` | Per-request access log; set to `off` (or `0` / `false` / `no`) to silence it | on |
 
 ## API key authentication
 
@@ -59,6 +60,28 @@ To keep a health-check endpoint open:
 
 ```bash
 OLLAMA_MOCK_API_KEY=sk-mock-123 OLLAMA_MOCK_AUTH_EXEMPT=/api/version go run .
+```
+
+## Access log
+
+Every request is printed to stdout as a single structured line, enabled by default:
+
+```
+2026/09/18 12:21:39.134312 access method=POST path=/api/generate status=200 latency=51.475ms bytes=740 ip=::1 key=sk-m...3456 model=llama3.2:latest
+```
+
+Fields: `method`, `path`, `status`, `latency`, `bytes` (response size), `ip` (client),
+`key` (masked API key, `-` when none), `model` (from the JSON request body, empty for GETs).
+
+```bash
+# Silence the access log
+OLLAMA_MOCK_ACCESS_LOG=off go run .
+
+# Write it to a file
+go run . > access.log 2>&1
+
+# Follow / filter it
+tail -f access.log | grep 'path=/api/chat'
 ```
 
 ## Fixed mock data
@@ -124,6 +147,7 @@ internal/handlers    # endpoint handlers
 internal/router      # route registration
 internal/stream      # NDJSON streaming helpers
 internal/auth        # optional API key middleware
+internal/logging     # per-request access log
 internal/httputil    # unified error responses
 tests/api_test.go    # API tests
 ```

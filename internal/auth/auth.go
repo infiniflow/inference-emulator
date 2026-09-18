@@ -39,7 +39,7 @@ func Middleware() gin.HandlerFunc {
 			return
 		}
 
-		if key, ok := extractKey(c); ok {
+		if key, ok := ExtractKey(c); ok {
 			if _, ok := accepted[key]; ok {
 				c.Next()
 				return
@@ -53,9 +53,9 @@ func Middleware() gin.HandlerFunc {
 	}
 }
 
-// extractKey reads the key from X-API-Key or Authorization ("Bearer <key>" or a
+// ExtractKey reads the key from X-API-Key or Authorization ("Bearer <key>" or a
 // bare key). It reports false when no usable header is present.
-func extractKey(c *gin.Context) (string, bool) {
+func ExtractKey(c *gin.Context) (string, bool) {
 	if v := strings.TrimSpace(c.GetHeader("X-API-Key")); v != "" {
 		return v, true
 	}
