@@ -15,13 +15,14 @@ import (
 	"sync"
 	"time"
 
-	"github.com/gin-gonic/gin"
 	"ollama-mock/internal/auth"
 	"ollama-mock/internal/config"
+
+	"github.com/gin-gonic/gin"
 )
 
 // maxLoggedBody is the upper bound of the request body read to extract the model
-// name. The body is restored afterwards so handlers can still read it.
+// name. The body is restored afterward so handlers can still read it.
 const maxLoggedBody = 4 << 20 // 4 MiB
 
 var (
